@@ -10,6 +10,7 @@ import capitalize from "~/utils/capitalize";
 
 import { type CreateEventData, CreateEventSchema } from "~/schema/event.schema";
 import { api } from "~/trpc/react";
+import FormButtons from "./form-buttons";
 
 interface CreateEventProps {
   types: EventType[];
@@ -75,7 +76,7 @@ export default function CreateEvent({ types }: CreateEventProps) {
           register={form.register}
           error={form.formState.errors?.location?.message}
         />
-        <div className="flex justify-end gap-4">
+        {/* <div className="flex justify-end gap-4">
           <button
             type="button"
             className="rounded bg-slate-400 px-4 py-2"
@@ -91,7 +92,12 @@ export default function CreateEvent({ types }: CreateEventProps) {
           >
             {form.formState.isLoading ? "Loading..." : `Create Event`}
           </button>
-        </div>
+        </div> */}
+        <FormButtons
+          submitTitle={`Create Event`}
+          isLoading={form.formState.isLoading}
+          onClickCancel={() => router.push("/")}
+        />
       </form>
     </div>
   );

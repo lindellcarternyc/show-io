@@ -27,3 +27,19 @@ model Event {
     end         DateTime
     location    String
 }
+
+model ShowRole {
+    id              String      @id @default(cuid())
+    title           String
+
+    showMembers     ShowMember[]
+}
+
+model ShowMember {
+    id          String      @id @default(cuid())
+    firstName   String
+    lastName    String
+
+    showRoleId  String
+    showRole    ShowRole    @relation(references: [id], fields: [showRoleId])
+}

@@ -1,18 +1,44 @@
+"use client";
+import { useState, useEffect } from "react";
+
 import Link from "next/link";
+import type { Event, ShowMember } from "@prisma/client";
+import { api } from "~/trpc/react";
 
-import { CreatePost } from "~/app/_components/create-post";
-import { api } from "~/trpc/server";
+export default function Home() {
+  const [allEvents, setAllEvents] = useState<Event[]>([]);
 
-export default async function Home() {
-  const eventTypes = await api.event.getEventTypes.query();
-  const allEvents = await api.event.getEvents.query();
-  const upcomingEvents = await api.event.getUpcomingEvents.query();
+  const getAllEvents = api.event.getEvents.useQuery();
+
+  useEffect(() => {
+    if (getAllEvents.data) {
+      setAllEvents(getAllEvents.data);
+    }
+  }, [getAllEvents.data]);
+
+  const upcomingEvents = allEvents.filter(
+    (evt) => evt.start.getTime() > new Date().getTime(),
+  );
+
+  const [showMembers, setShowMembers] = useState<ShowMember[]>([]);
+
+  const getShowMembers = api.showMember.getAll.useQuery();
+
+  useEffect(() => {
+    if (getShowMembers.data) {
+      setShowMembers(getShowMembers.data);
+    }
+  }, [getShowMembers.data]);
 
   return (
     <main className="flex flex-col gap-4">
-      <Data title="Event types" data={eventTypes} />
+      <div className="flex gap-4">
+        <Link href="/events/create">Create Event</Link>
+        <Link href="/show-members/create">Create Show Member</Link>
+      </div>
       <Data title="All events" data={allEvents} />
       <Data title="Upcoming events" data={upcomingEvents} />
+      <Data title="Personnel" data={showMembers} />
     </main>
   );
 }
