@@ -2,52 +2,45 @@
 import { useState, useEffect } from "react";
 
 import Link from "next/link";
-import type { Event, ShowMember } from "@prisma/client";
+import type { Event } from "@prisma/client";
 import { api } from "~/trpc/react";
+import capitalize from "~/utils/capitalize";
+import { format } from "date-fns";
 
 export default function Home() {
-  const [allEvents, setAllEvents] = useState<Event[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<
+    (Event & { type: { type: string } })[]
+  >([]);
 
-  const getAllEvents = api.event.getEvents.useQuery();
-
-  useEffect(() => {
-    if (getAllEvents.data) {
-      setAllEvents(getAllEvents.data);
-    }
-  }, [getAllEvents.data]);
-
-  const upcomingEvents = allEvents.filter(
-    (evt) => evt.start.getTime() > new Date().getTime(),
-  );
-
-  const [showMembers, setShowMembers] = useState<ShowMember[]>([]);
-
-  const getShowMembers = api.showMember.getAll.useQuery();
+  const getUpcomingEvents = api.event.getUpcomingEvents.useQuery();
 
   useEffect(() => {
-    if (getShowMembers.data) {
-      setShowMembers(getShowMembers.data);
+    if (getUpcomingEvents.data) {
+      setUpcomingEvents(getUpcomingEvents.data);
     }
-  }, [getShowMembers.data]);
+  }, [getUpcomingEvents.data]);
 
   return (
     <main className="flex flex-col gap-4">
-      <div className="flex gap-4">
-        <Link href="/events/create">Create Event</Link>
-        <Link href="/show-members/create">Create Show Member</Link>
-      </div>
-      <Data title="All events" data={allEvents} />
-      <Data title="Upcoming events" data={upcomingEvents} />
-      <Data title="Personnel" data={showMembers} />
+      <h2 className="text-lg">Upcoming Events</h2>
+      <ul className="flex flex-col gap-4">
+        {upcomingEvents.map((evt) => (
+          <li key={evt.id} className="rounded-md border shadow-md">
+            <Link href={`/events/${evt.id}`}>
+              <section className="flex flex-col gap-2">
+                <header>{capitalize(evt.type.type)}</header>
+                <div>
+                  <p>{format(evt.start, "E, MMM dd, yyy")}</p>
+                  <p className="flex flex-col gap-2">
+                    {format(evt.start, "hh:mm a")} -{" "}
+                    {format(evt.end, "hh:mm a")}
+                  </p>
+                </div>
+              </section>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </main>
-  );
-}
-
-function Data({ title, data }: { title: string; data: unknown }): JSX.Element {
-  return (
-    <section className="flex flex-col gap-2">
-      <label>{title}</label>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </section>
   );
 }

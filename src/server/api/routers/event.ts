@@ -10,9 +10,21 @@ export const eventRouter = createTRPCRouter({
   getEvents: publicProcedure.query(async ({ ctx }) => {
     return ctx.db.event.findMany();
   }),
-
+  getById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input: { id } }) => {
+      return ctx.db.event.findFirst({
+        where: {
+          id,
+        },
+        include: { type: true },
+      });
+    }),
   getUpcomingEvents: publicProcedure.query(async ({ ctx }) => {
-    return ctx.db.event.findMany({ where: { start: { gte: new Date() } } });
+    return ctx.db.event.findMany({
+      where: { start: { gte: new Date() } },
+      include: { type: true },
+    });
   }),
   create: publicProcedure
     .input(z.object({ data: CreateEventSchema }))
