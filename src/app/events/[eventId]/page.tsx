@@ -1,14 +1,37 @@
+"use client";
+
+import type { Call, CallList, Event, ShowMember } from "@prisma/client";
 import { format } from "date-fns";
-import { api } from "~/trpc/server";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import CallSheet from "~/app/_components/call-sheet";
+import { api } from "~/trpc/react";
 import capitalize from "~/utils/capitalize";
 
-export default async function EventPage({
-  params,
-}: {
-  params: { eventId: string };
-}) {
-  const event = await api.event.getById.query({ id: params.eventId });
+type EventData = Event & { type: { type: string } };
 
+type CallListData = CallList & {
+  calls: (Call & { personnel: ShowMember[] })[];
+};
+
+export default function EventPage({ params }: { params: { eventId: string } }) {
+  const { eventId } = params;
+
+  const [event, setEvent] = useState<EventData | null>(null);
+  const getEvent = api.event.getById.useQuery({ id: eventId });
+
+  useEffect(() => {
+    setEvent(getEvent.data ?? null);
+  }, [getEvent.data]);
+
+  const [callList, setCallList] = useState<CallListData | null>(null);
+  const getCallList = api.callList.getByEventId.useQuery({ eventId });
+
+  useEffect(() => {
+    setCallList(getCallList.data ?? null);
+  }, [getCallList.data]);
+
+  if (getEvent.isLoading) return <div>Loading...</div>;
   if (event === null) return <div>No event found!</div>;
 
   return (
@@ -22,9 +45,15 @@ export default async function EventPage({
           {format(event.start, "hh:mm a")} - {format(event.end, "hh:mm a")}
         </p>
       </div>
-      <div>
-        <p>Calls</p>
-      </div>
+      {getCallList.isLoading ? (
+        <div>Loading....</div>
+      ) : callList === null ? (
+        <Link href={`/events/${eventId}/callsheet/create`}>
+          Create call sheet
+        </Link>
+      ) : (
+        <CallSheet calls={callList.calls} />
+      )}
     </div>
   );
 }

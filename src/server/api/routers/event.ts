@@ -8,7 +8,7 @@ export const eventRouter = createTRPCRouter({
   }),
 
   getEvents: publicProcedure.query(async ({ ctx }) => {
-    return ctx.db.event.findMany();
+    return ctx.db.event.findMany({ include: { type: true } });
   }),
   getById: publicProcedure
     .input(z.object({ id: z.string() }))

@@ -2,7 +2,7 @@ import type { BaseInputProps } from "./interfaces";
 
 export interface InputProps<FieldValues extends Record<string, unknown>>
   extends BaseInputProps<FieldValues> {
-  type?: "text" | "number" | "datetime-local";
+  type?: "text" | "number" | "datetime-local" | "time";
 }
 export default function Input<FieldValues extends Record<string, unknown>>({
   id,

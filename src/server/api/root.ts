@@ -1,5 +1,6 @@
-import { postRouter } from "~/server/api/routers/post";
 import { createTRPCRouter } from "~/server/api/trpc";
+
+import { callListRouter } from "./routers/call-list";
 import { eventRouter } from "./routers/event";
 import { showRoleRouter } from "./routers/show-role";
 import { showMemberRouter } from "./routers/show-member";
@@ -11,9 +12,9 @@ import { showMemberRouter } from "./routers/show-member";
  */
 export const appRouter = createTRPCRouter({
   event: eventRouter,
-  post: postRouter,
   showRole: showRoleRouter,
-  showMember: showMemberRouter
+  showMember: showMemberRouter,
+  callList: callListRouter,
 });
 
 // export type definition of API

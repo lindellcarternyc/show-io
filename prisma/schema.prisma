@@ -26,6 +26,8 @@ model Event {
     start       DateTime
     end         DateTime
     location    String
+    
+    callList    CallList?
 }
 
 model ShowRole {
@@ -42,4 +44,26 @@ model ShowMember {
 
     showRoleId  String
     showRole    ShowRole    @relation(references: [id], fields: [showRoleId])
+
+    calls       Call[]
+}
+
+model Call {    
+    id          String          @id @default(cuid())
+    start       DateTime
+    end         DateTime
+    
+    title       String
+    personnel   ShowMember[]
+    
+    callListId  String
+    callList    CallList        @relation(references: [id], fields: [callListId])
+}
+
+model CallList {
+    id          String  @id @default(cuid())
+    calls       Call[]
+
+    eventId     String  @unique
+    event       Event   @relation(references: [id], fields: [eventId])
 }
